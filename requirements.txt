@@ -2,3 +2,6 @@ django
 djangorestframework
 openpyxl
 django-cors-headers
+whitenoise
+gunicorn
+psycopg2-binary
