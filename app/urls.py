@@ -6,6 +6,6 @@ urlpatterns = [
     path("addData/", views.setData, name="AddData"),
     path("getData/<int:machine>/", views.getData, name='GetData'),
     path("deleteData/<int:machine>/", views.deleteData, name="DeleteData"),
-    path("/", views.returnHomePage, name="HomePage")
+    path("HomePage/", views.returnHomePage, name="HomePage")
     # path("getALlData/<str:date>", views.getAllData, name='GetAllData)
 ]

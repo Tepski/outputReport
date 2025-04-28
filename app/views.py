@@ -19,7 +19,7 @@ def returnHomePage(requests):
 
 def handleExcel(data):
     try:
-        excel_path = os.path.join(settings.BASE_DIR, "static", "TEMPLATE.xlsx")
+        excel_path = os.path.join(settings.BASE_DIR, "staticfiles", "TEMPLATE.xlsx")
         wb = load_workbook(excel_path)
         ws =  wb.active
 
@@ -34,6 +34,8 @@ def handleExcel(data):
         output = BytesIO()
         wb.save(output)
         output.seek(0)
+
+        print("Success")
 
         return output
     except:
@@ -62,10 +64,9 @@ def setData(request):
 def getData(request, machine):
     data = MachineData.objects.get(machine=machine)
 
-    srlzr = MachineSrlzr(data=data)
+    srlzr = MachineSrlzr(data)
     
-    if srlzr.is_valid():
-
+    try:
         dict = {
             "name": f"SAM {srlzr.data['machine']}",
             "date": srlzr.data["date"],
@@ -83,7 +84,7 @@ def getData(request, machine):
         
         return FileResponse(res, as_attachment=True, filename=f"{dict['name']}.xlsx")
     
-    else:
+    except:
         return Response({"Message": "OUTPUT FAILED, Try again later"}, status=status.HTTP_404_NOT_FOUND)
 
 @api_view(["DELETE"])
