@@ -75,3 +75,13 @@ def getData(request, machine):
     res = handleExcel(dict)
     
     return FileResponse(res, as_attachment=True, filename=f"{dict['name']}.xlsx")
+
+@api_view(["DELETE"])
+def deleteData(request, machine):
+    machine = MachineData.objects.filter(machine=machine)
+    try:
+        machine.delete()
+
+        return Response({"Message": "Machine succesfully deleted"}, status=status.HTTP_200_OK)
+    except:
+        return Response({"Message": "Failed to delete machine"})
