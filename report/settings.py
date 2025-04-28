@@ -74,7 +74,7 @@ WSGI_APPLICATION = 'report.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backend.postgresql',
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'output_report_db',
         'USER': 'tepskiii',
         'PASSWORD': 'cs6fo63jHhgh7eExU9rVEKIwbRcIEV8u',
