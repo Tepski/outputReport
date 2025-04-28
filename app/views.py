@@ -62,7 +62,7 @@ def setData(request):
 def getData(request, machine):
     data = MachineData.objects.get(machine=machine)
 
-    srlzr = MachineSrlzr(data)
+    srlzr = MachineSrlzr(data=data)
     
     if srlzr.is_valid():
 
