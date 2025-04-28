@@ -84,7 +84,7 @@ def getData(request, machine):
         return FileResponse(res, as_attachment=True, filename=f"{dict['name']}.xlsx")
     
     else:
-        return HttpResponse("<h1>No File FOUND</h1>")
+        return Response({"Message": "OUTPUT FAILED, Try again later"}, status=status.HTTP_404_NOT_FOUND)
 
 @api_view(["DELETE"])
 def deleteData(request, machine):
