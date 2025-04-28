@@ -14,6 +14,9 @@ from .models import MachineData
 AWS ROOT PASSWORD: {PC Password} + 01
 """
 
+def returnHomePage(requests):
+    return HttpResponse("<div><h1>WELCOME TO THE HOMEPAGE FOR SAM MACHINE OUTPUT MONITORING</h1></div>")
+
 def handleExcel(data):
     try:
         excel_path = os.path.join(settings.BASE_DIR, "static", "TEMPLATE.xlsx")
