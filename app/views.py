@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import FileResponse
+from django.http import FileResponse, HttpResponse
 from openpyxl import load_workbook
 import os
 from django.conf import settings
@@ -58,23 +58,30 @@ def setData(request):
 @api_view(["GET"])
 def getData(request, machine):
     data = MachineData.objects.get(machine=machine)
-    srlzr = MachineSrlzr(data)
-    dict = {
-        "name": f"SAM {srlzr.data['machine']}",
-        "date": srlzr.data["date"],
-        "ds_ok": srlzr.data["ds_ok_count"],
-        "ds_ng": srlzr.data["ds_ng_count"],
-        "ns_ok": srlzr.data["ns_ok_count"],
-        "ns_ng": srlzr.data["ns_ng_count"],
-        "ds_ok_hr": srlzr.data["ds_ok_perhr"],
-        "ds_ng_hr": srlzr.data["ds_ng_perhr"],
-        "ns_ok_hr": srlzr.data["ns_ok_perhr"],
-        "ns_ng_hr": srlzr.data["ns_ng_perhr"]
-    }
 
-    res = handleExcel(dict)
+    srlzr = MachineSrlzr(data)
     
-    return FileResponse(res, as_attachment=True, filename=f"{dict['name']}.xlsx")
+    if srlzr.is_valid():
+
+        dict = {
+            "name": f"SAM {srlzr.data['machine']}",
+            "date": srlzr.data["date"],
+            "ds_ok": srlzr.data["ds_ok_count"],
+            "ds_ng": srlzr.data["ds_ng_count"],
+            "ns_ok": srlzr.data["ns_ok_count"],
+            "ns_ng": srlzr.data["ns_ng_count"],
+            "ds_ok_hr": srlzr.data["ds_ok_perhr"],
+            "ds_ng_hr": srlzr.data["ds_ng_perhr"],
+            "ns_ok_hr": srlzr.data["ns_ok_perhr"],
+            "ns_ng_hr": srlzr.data["ns_ng_perhr"]
+        }
+
+        res = handleExcel(dict)
+        
+        return FileResponse(res, as_attachment=True, filename=f"{dict['name']}.xlsx")
+    
+    else:
+        return HttpResponse("<h1>No File FOUND</h1>")
 
 @api_view(["DELETE"])
 def deleteData(request, machine):
@@ -85,3 +92,13 @@ def deleteData(request, machine):
         return Response({"Message": "Machine succesfully deleted"}, status=status.HTTP_200_OK)
     except:
         return Response({"Message": "Failed to delete machine"})
+    
+
+@api_view(["POST"])
+def getAllData(request, date):
+    data = MachineData.objects.filter(date=date)
+
+    srlzr = MachineSrlzr(data=data)
+
+    return Response(srlzr.data, status=status.HTTP_200_OK)
+    
