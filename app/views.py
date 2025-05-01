@@ -179,4 +179,4 @@ def getAllData(request, date):
     
         return FileResponse(res, as_attachment=True, filename="SAM_OUTPUT.xlsx")
     except Exception as e:
-        return Response(data_arr)
+        return Response({"Message": "Failed"})
