@@ -1,7 +1,8 @@
 from django.shortcuts import render
 from django.http import FileResponse, HttpResponse
 from openpyxl import load_workbook
-import os
+from openpyxl.utils import get_column_letter
+import os, ast
 from django.conf import settings
 from io import BytesIO
 from rest_framework.decorators import api_view
@@ -42,23 +43,31 @@ def handleExcel(data):
         print("An error occured")
 
 
-def generate_excel(request):
-    data = request.GET.get('value')
+# def generate_excel(request):
+#     data = request.GET.get('value')
 
-    res = handleExcel(data)
+#     res = handleExcel(data)
 
-    return FileResponse(res, as_attachment=True, filename="TestFile.xlsx")
+#     return FileResponse(res, as_attachment=True, filename="TestFile.xlsx")
 
 @api_view(["POST"])
 def setData(request):
-    res = request.data
-    srlzr = MachineSrlzr(data=res)
-    if srlzr.is_valid():
-        srlzr.save()
-
+    try:
+        res = request.data
+        date = request.data.get("date")
+        shift = request.data.get("shift")
+        machine = request.data.get("machine")
+        obj, create = MachineData.objects.update_or_create(
+            date=date,
+            shift=shift,
+            machine=machine,
+            defaults=res
+        )
+        srlzr = MachineSrlzr(obj)
+        
         return Response(srlzr.data, status=status.HTTP_200_OK)
-    
-    return Response({"Message": "Failed"}, status=status.HTTP_400_BAD_REQUEST)
+    except:
+        return Response({"Message": "Failed"}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(["GET"])
 def getData(request, machine):
@@ -67,7 +76,7 @@ def getData(request, machine):
     srlzr = MachineSrlzr(data)
     
     try:
-        dict = {
+        sam_dict = {
             "name": f"SAM {srlzr.data['machine']}",
             "date": srlzr.data["date"],
             "ds_ok": srlzr.data["ds_ok_count"],
@@ -80,9 +89,9 @@ def getData(request, machine):
             "ns_ng_hr": srlzr.data["ns_ng_perhr"]
         }
 
-        res = handleExcel(dict)
+        res = handleExcel(sam_dict)
         
-        return FileResponse(res, as_attachment=True, filename=f"{dict['name']}.xlsx")
+        return FileResponse(res, as_attachment=True, filename=f"{sam_dict['name']}.xlsx")
     
     except:
         return Response({"Message": "OUTPUT FAILED, Try again later"}, status=status.HTTP_404_NOT_FOUND)
@@ -96,13 +105,78 @@ def deleteData(request, machine):
         return Response({"Message": "Machine succesfully deleted"}, status=status.HTTP_200_OK)
     except:
         return Response({"Message": "Failed to delete machine"})
-    
 
-@api_view(["POST"])
+def handleExcelForAll(data):
+    try:
+        path = os.path.join(settings.BASE_DIR, "staticfiles", "TEMPLATE.xlsx")
+        wb = load_workbook(path)
+        ws = wb["OUTPUT"]
+
+        ws.sheet_state = "veryHidden"
+        for item in data:
+            ws2 = wb.copy_worksheet(ws)
+            ws2["G1"].value = item["name"]
+            ws2["M1"].value = item["date"]
+            #b5 b6 b8 b9
+            ws2["B5"].value = item["ds_ok"]
+            ws2["B6"].value = item["ds_ng"]
+            ws2["B8"].value = item["ns_ok"]
+            ws2["B9"].value = item["ns_ng"]
+
+            for ndx, obj in enumerate(item['ds_ok_hr']):
+                col = get_column_letter(ndx + 4)
+                ws2[f"{col}5"].value = obj
+            for ndx, obj in enumerate(item['ds_ng_hr']):
+                col = get_column_letter(ndx + 4)
+                ws2[f"{col}6"].value = obj
+            for ndx, obj in enumerate(item['ns_ok_hr']):
+                col = get_column_letter(ndx + 4)
+                ws2[f"{col}8"].value = obj
+            for ndx, obj in enumerate(item['ns_ng_hr']):
+                col = get_column_letter(ndx + 4)
+                ws2[f"{col}9"].value = obj
+
+
+
+            ws2.title = item["name"]
+
+        output = BytesIO()
+        wb.save(output)
+        output.seek(0)
+
+        return output
+    except: pass
+ 
+
+@api_view(["GET"])
 def getAllData(request, date):
-    data = MachineData.objects.filter(date=date)
+    try:
+        data = MachineData.objects.filter(date=date)
 
-    srlzr = MachineSrlzr(data=data)
+        srlzr = MachineSrlzr(data, many=True)
 
-    return Response(srlzr.data, status=status.HTTP_200_OK)
+        data_list = []
+
+        data_arr = srlzr.data
+        for item in data_arr:
+            data_to_send = {
+                "name": f"SAM {item['machine']}",
+                "date": item["date"],
+                "shift": item["shift"],
+                "ds_ok": item["ds_ok_count"],
+                "ds_ng": item["ds_ng_count"],
+                "ns_ok": item["ns_ok_count"],
+                "ns_ng": item["ns_ng_count"],
+                "ds_ok_hr": ast.literal_eval(item["ds_ok_perhr"]),
+                "ds_ng_hr": ast.literal_eval(item["ds_ng_perhr"]),
+                "ns_ok_hr": ast.literal_eval(item["ns_ok_perhr"]),
+                "ns_ng_hr": ast.literal_eval(item["ns_ng_perhr"])
+            }
+
+            data_list.append(data_to_send)
+
+        res = handleExcelForAll(data_list)
     
+        return FileResponse(res, as_attachment=True, filename="SAM_OUTPUT.xlsx")
+    except Exception as e:
+        return Response(data_arr)
