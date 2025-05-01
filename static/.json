@@ -1,6 +1,4 @@
-import requests
-
-datas = [{
+[{
     "id": 2,
     "machine": 7,
     "date": "2025-04-30",
@@ -128,10 +126,3 @@ datas = [{
     "timestamp": "2025-05-01T06:19:34.758069+08:00",
     "updated": "2025-05-01T06:56:43.620682+08:00"
 }]
-
-url = "https://outputreport.onrender.com/api/addData/"
-
-for data in datas:
-    res = requests.post(url, json=data)
-
-    print(res)
