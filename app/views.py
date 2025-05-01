@@ -177,6 +177,10 @@ def getAllData(request, date):
 
         res = handleExcelForAll(data_list)
         
-        return FileResponse(res, as_attachment=True, filename="SAM_OUTPUT.xlsx")
+        return FileResponse(res, as_attachment=True, filename=f"SAM OUTPUT {date}.xlsx")
     except Exception as e:
-        return Response({"Message": "Failed"})
+        return HttpResponse("""
+                            <div>
+                                <h1>No data found, please try other dates</h1>
+                            </div>
+                            """)
