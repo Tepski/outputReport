@@ -176,7 +176,7 @@ def getAllData(request, date):
             data_list.append(data_to_send)
 
         res = handleExcelForAll(data_list)
-    
+        
         return FileResponse(res, as_attachment=True, filename="SAM_OUTPUT.xlsx")
     except Exception as e:
         return Response({"Message": "Failed"})
