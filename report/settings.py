@@ -79,9 +79,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'output_report_db',
-        'USER': 'tepskiii',
-        'PASSWORD': 'cs6fo63jHhgh7eExU9rVEKIwbRcIEV8u',
-        'HOST': 'dpg-d07j1rhr0fns738k5e3g-a',
+        'USER': 'output_report_db_0cl3_user',
+        'PASSWORD': 'EXSiObQZwNUwnY3euYIp7OS3DNNPaXqh',
+        'HOST': 'dpg-d09eln15pdvs73dimc0g-a',
         'PORT': '5432'
     }
 }
