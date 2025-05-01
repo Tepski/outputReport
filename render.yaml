@@ -3,4 +3,4 @@ services:
     name: django-app
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn report.wsgi
+    startCommand: python manage.py mirgrate && gunicorn report.wsgi
