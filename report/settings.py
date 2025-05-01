@@ -78,10 +78,10 @@ WSGI_APPLICATION = 'report.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'REPORT_GENERATION',
-        'USER': 'output_report_db_0cl3_user',
-        'PASSWORD': 'EXSiObQZwNUwnY3euYIp7OS3DNNPaXqh',
-        'HOST': 'dpg-d09eln15pdvs73dimc0g-a',
+        'NAME': 'report_generator_x6yf',
+        'USER': 'tepskiii',
+        'PASSWORD': 'FIoZEi6Sh7qDWprebftC7ku4BtFjo8fY',
+        'HOST': 'dpg-d09f12be5dus73bfb2jg-a',
         'PORT': '5432'
     }
 }
