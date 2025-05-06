@@ -5,7 +5,7 @@ from django.db import models
 class MachineData(models.Model):
     machine = models.IntegerField()
     date = models.CharField(max_length=40)
-    shift = models.CharField(max_length=2, null=True)
+    shift = models.CharField(max_length=2, null=True, default="")
     ds_ok_count = models.IntegerField(null=True, default=0)
     ds_ng_count = models.IntegerField(null=True, default=0)
     ns_ok_count = models.IntegerField(null=True, default=0)
