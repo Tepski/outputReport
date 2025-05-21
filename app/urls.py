@@ -7,5 +7,6 @@ urlpatterns = [
     path("getData/<int:machine>/", views.getData, name='GetData'),
     path("deleteData/<int:machine>/", views.deleteData, name="DeleteData"),
     path("HomePage/", views.returnHomePage, name="HomePage"),
-    path("getAllData/<str:date>", views.getAllData, name='GetAllData')
+    path("getAllData/<str:date>", views.getAllData, name='GetAllData'),
+    path("getJSON/", views.getJSON, name='get json data')
 ]

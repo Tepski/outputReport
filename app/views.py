@@ -184,3 +184,15 @@ def getAllData(request, date):
                                 <h1>No data found, please try other dates</h1>
                             </div>
                             """)
+
+@api_view(["GET"])
+def getJSON(requests):
+    data = MachineData.objects.all()
+
+    data_srlzr = MachineSrlzr(data, many=True)
+
+    try:
+        return Response(data_srlzr.data, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response({"Message": "It failed for some reason"})
