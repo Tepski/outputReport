@@ -1,9 +1,9 @@
 import os
-# from dotenv import load_dotenv
+from dotenv import load_dotenv
 
 from pathlib import Path
 
-# load_dotenv()
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -18,7 +18,8 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG")
 
-ALLOWED_HOSTS = [os.getenv("RENDER_EXTERNAL_HOSTNAME", "localhost")]
+ALLOWED_HOSTS = [os.getenv("RENDER_EXTERNAL_HOSTNAME", "localhost"), '127.0.0.1']
+
 
 
 # Application definition
@@ -68,23 +69,23 @@ WSGI_APPLICATION = 'report.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'report_generator_x6yf',
-        'USER': 'tepskiii',
-        'PASSWORD': 'FIoZEi6Sh7qDWprebftC7ku4BtFjo8fY',
-        'HOST': 'dpg-d09f12be5dus73bfb2jg-a',
-        'PORT': '5432'
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'report_generator_x6yf',
+#         'USER': 'tepskiii',
+#         'PASSWORD': 'FIoZEi6Sh7qDWprebftC7ku4BtFjo8fY',
+#         'HOST': 'dpg-d09f12be5dus73bfb2jg-a',
+#         'PORT': '5432'
+#     }
+# }
 
 
 # Password validation

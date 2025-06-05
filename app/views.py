@@ -176,8 +176,17 @@ def getAllData(request, date):
             data_list.append(data_to_send)
 
         res = handleExcelForAll(data_list)
+
+        http = """
+<div>
+    <h1>Download Feature under repair, please wait...</h1>
+    <h1>Thank you</h1>
+</div>
+"""
+
+        return HttpResponse(http)
         
-        return FileResponse(res, as_attachment=True, filename=f"SAM OUTPUT {date}.xlsx")
+    #     return FileResponse(res, as_attachment=True, filename=f"SAM OUTPUT {date}.xlsx")
     except Exception as e:
         return HttpResponse("""
                             <div>
