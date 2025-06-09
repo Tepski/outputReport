@@ -10,15 +10,17 @@ from rest_framework.response import Response
 from . serializers import MachineSrlzr
 from rest_framework import status
 from .models import MachineData
+from firebase import db
+from google.cloud.firestore_v1 import FieldFilter, SERVER_TIMESTAMP
 
-"""
-AWS ROOT PASSWORD: {PC Password} + 01
-"""
 
 def returnHomePage(requests):
     return HttpResponse("<div><h1>WELCOME TO THE HOMEPAGE FOR SAM MACHINE OUTPUT MONITORING</h1></div>")
 
 def handleExcel(data):
+    if data is None:
+        print("Error: data is None")
+        return None
     try:
         excel_path = os.path.join(settings.BASE_DIR, "staticfiles", "TEMPLATE.xlsx")
         wb = load_workbook(excel_path)
@@ -39,33 +41,27 @@ def handleExcel(data):
         print("Success")
 
         return output
-    except:
-        print("An error occured")
-
-
-# def generate_excel(request):
-#     data = request.GET.get('value')
-
-#     res = handleExcel(data)
-
-#     return FileResponse(res, as_attachment=True, filename="TestFile.xlsx")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
 
 @api_view(["POST"])
 def setData(request):
     try:
         res = request.data
-        date = request.data.get("date")
-        shift = request.data.get("shift")
-        machine = request.data.get("machine")
-        obj, create = MachineData.objects.update_or_create(
-            date=date,
-            shift=shift,
-            machine=machine,
-            defaults=res
-        )
-        srlzr = MachineSrlzr(obj)
         
-        return Response(srlzr.data, status=status.HTTP_200_OK)
+        machine = res['machine']
+        date = res['date']
+
+        doc_id = f"{date}-SAM{machine}"
+        doc_ref = db.collection("MachineData").document(doc_id)
+        res['timestamp'] = SERVER_TIMESTAMP
+        res['updated'] = SERVER_TIMESTAMP
+
+        print(doc_id)
+
+        doc_ref.set(res)
+        return Response({"Message": res["date"]})
     except:
         return Response({"Message": "Failed"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -147,22 +143,27 @@ def handleExcelForAll(data):
         return output
     except: pass
  
-
 @api_view(["GET"])
 def getAllData(request, date):
     try:
-        data = MachineData.objects.filter(date=date)
 
-        srlzr = MachineSrlzr(data, many=True)
+        # data = MachineData.objects.filter(date=date)
+
+        # srlzr = MachineSrlzr(data, many=True)
 
         data_list = []
 
-        data_arr = srlzr.data
+        # data_arr = srlzr.data
+        
+        data = db.collection("DATA").where(filter=FieldFilter("date", "==", date)).get()
+
+        data_arr = [x.to_dict() for x in data]
+
         for item in data_arr:
             data_to_send = {
                 "name": f"SAM {item['machine']}",
                 "date": item["date"],
-                "shift": item["shift"],
+                # "shift": item["shift"],
                 "ds_ok": item["ds_ok_count"],
                 "ds_ng": item["ds_ng_count"],
                 "ns_ok": item["ns_ok_count"],
@@ -184,10 +185,13 @@ def getAllData(request, date):
 </div>
 """
 
-        return HttpResponse(http)
+        print("Dito ba yung shift na yan", data_arr[0]['machine'])
+
+        # return HttpResponse()
         
-    #     return FileResponse(res, as_attachment=True, filename=f"SAM OUTPUT {date}.xlsx")
+        return FileResponse(res, as_attachment=True, filename=f"SAM OUTPUT {date}.xlsx")
     except Exception as e:
+        print("Or dito ba yung shift na yan:", e)
         return HttpResponse("""
                             <div>
                                 <h1>No data found, please try other dates</h1>
@@ -205,3 +209,4 @@ def getJSON(requests):
 
     except Exception as e:
         return Response({"Message": "It failed for some reason"})
+        
