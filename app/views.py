@@ -108,29 +108,36 @@ def handleExcelForAll(data):
         wb = load_workbook(path)
         ws = wb["OUTPUT"]
 
+        print("handleExcel", data)
+
         ws.sheet_state = "veryHidden"
         for item in data:
             ws2 = wb.copy_worksheet(ws)
             ws2["G1"].value = item["name"]
             ws2["M1"].value = item["date"]
             #b5 b6 b8 b9
-            ws2["B5"].value = item["ds_ok"]
-            ws2["B6"].value = item["ds_ng"]
-            ws2["B8"].value = item["ns_ok"]
-            ws2["B9"].value = item["ns_ng"]
+            if "ds_ok" in item.keys():
 
-            for ndx, obj in enumerate(item['ds_ok_hr']):
-                col = get_column_letter(ndx + 4)
-                ws2[f"{col}5"].value = obj
-            for ndx, obj in enumerate(item['ds_ng_hr']):
-                col = get_column_letter(ndx + 4)
-                ws2[f"{col}6"].value = obj
-            for ndx, obj in enumerate(item['ns_ok_hr']):
-                col = get_column_letter(ndx + 4)
-                ws2[f"{col}8"].value = obj
-            for ndx, obj in enumerate(item['ns_ng_hr']):
-                col = get_column_letter(ndx + 4)
-                ws2[f"{col}9"].value = obj
+                ws2["B5"].value = item["ds_ok"]
+                ws2["B6"].value = item["ds_ng"]
+
+                for ndx, obj in enumerate(item['ds_ok_hr']):
+                    col = get_column_letter(ndx + 4)
+                    ws2[f"{col}5"].value = obj
+                for ndx, obj in enumerate(item['ds_ng_hr']):
+                    col = get_column_letter(ndx + 4)
+                    ws2[f"{col}6"].value = obj
+
+            if "ns_ok" in item.keys():
+                ws2["B8"].value = item["ns_ok"]
+                ws2["B9"].value = item["ns_ng"]
+
+                for ndx, obj in enumerate(item['ns_ok_hr']):
+                    col = get_column_letter(ndx + 4)
+                    ws2[f"{col}8"].value = obj
+                for ndx, obj in enumerate(item['ns_ng_hr']):
+                    col = get_column_letter(ndx + 4)
+                    ws2[f"{col}9"].value = obj
 
 
 
@@ -163,36 +170,31 @@ def getAllData(request, date):
             data_to_send = {
                 "name": f"SAM {item['machine']}",
                 "date": item["date"],
-                # "shift": item["shift"],
-                "ds_ok": item["ds_ok_count"],
-                "ds_ng": item["ds_ng_count"],
-                "ns_ok": item["ns_ok_count"],
-                "ns_ng": item["ns_ng_count"],
-                "ds_ok_hr": ast.literal_eval(item["ds_ok_perhr"]),
-                "ds_ng_hr": ast.literal_eval(item["ds_ng_perhr"]),
-                "ns_ok_hr": ast.literal_eval(item["ns_ok_perhr"]),
-                "ns_ng_hr": ast.literal_eval(item["ns_ng_perhr"])
             }
+            if "ds_ok_count" in item.keys():
+                data_to_send["ds_ok"] = item["ds_ok_count"]
+                data_to_send["ds_ng"] = item["ds_ng_count"]
+                data_to_send["ds_ok_hr"] = ast.literal_eval(item["ds_ok_perhr"])
+                data_to_send["ds_ng_hr"] = ast.literal_eval(item["ds_ng_perhr"])
+
+            if "ns_ok_count" in item.keys():
+                data_to_send["ns_ok"] = item["ns_ok_count"]
+                data_to_send["ns_ng"] = item["ns_ng_count"]
+                data_to_send["ns_ok_hr"] = ast.literal_eval(item["ns_ok_perhr"])
+                data_to_send["ns_ng_hr"] = ast.literal_eval(item["ns_ng_perhr"])
+            
 
             data_list.append(data_to_send)
-
+        print("getAll", data_list)
         res = handleExcelForAll(data_list)
-
-        http = """
-<div>
-    <h1>Download Feature under repair, please wait...</h1>
-    <h1>Thank you</h1>
-</div>
-"""
-
-        print("Dito ba yung shift na yan", data_arr[0]['machine'])
 
         # return HttpResponse()
         
         return FileResponse(res, as_attachment=True, filename=f"SAM OUTPUT {date}.xlsx")
+    
     except Exception as e:
         print("Or dito ba yung shift na yan:", e)
-        return HttpResponse("""
+        return HttpResponse(f"""
                             <div>
                                 <h1>No data found, please try other dates</h1>
                             </div>
