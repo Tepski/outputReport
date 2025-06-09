@@ -155,7 +155,7 @@ def getAllData(request, date):
 
         # data_arr = srlzr.data
         
-        data = db.collection("DATA").where(filter=FieldFilter("date", "==", date)).get()
+        data = db.collection("MachineData").where(filter=FieldFilter("date", "==", date)).get()
 
         data_arr = [x.to_dict() for x in data]
 
