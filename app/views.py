@@ -60,7 +60,7 @@ def setData(request):
 
         print(doc_id)
 
-        doc_ref.set(res)
+        doc_ref.set(res, merge=True)
         return Response({"Message": res["date"]})
     except:
         return Response({"Message": "Failed"}, status=status.HTTP_400_BAD_REQUEST)
